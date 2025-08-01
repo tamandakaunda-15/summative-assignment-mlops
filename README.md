@@ -6,7 +6,7 @@ This project applies machine learning to predict student dropout based on demogr
 
 ##  Project Structure
 
-student-dropout-prediction/
+```student-dropout-prediction/
 ├── README.md # Project overview and documentation
 ├── notebook/
 │ └── student_dropout_prediction.ipynb # EDA, model training and evaluation
@@ -19,12 +19,8 @@ student-dropout-prediction/
 │ └── test/ # Testing dataset(s)
 └── models/
 └── model_name.pkl # Saved trained model(s)
+```
 
-yaml
-Copy
-Edit
-
----
 
 ##  Objective
 
