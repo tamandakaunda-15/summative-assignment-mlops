@@ -1,8 +1,7 @@
-#  Student Dropout Prediction
+#  Student Dropout Prediction Using Image Data
 
-This project applies machine learning to predict student dropout based on demographic, academic, and lifestyle data. The goal is to identify at-risk students early, enabling timely interventions.
+This project builds an ML pipeline to predict student dropout using non-tabular data (images), as a continuation of the student dropout prediction summative assignmetn previously done using tabular data.
 
----
 
 ##  Project Structure
 
@@ -22,24 +21,24 @@ This project applies machine learning to predict student dropout based on demogr
 ```
 
 
-##  Objective
+ ## Problem Statement
+The goal is to predict which students are at risk of dropping out based on visual cues (e.g., facial expressions, classroom engagement) extracted from image data. The aim is to build a model that can detect early warning signs using image-based machine learning.
 
-To develop and evaluate machine learning models that can predict the likelihood of student dropout using structured student data.
 
----
+## Dataset
+Source: [insert dataset name or link here]
+Format: Images (.jpg/.png)
+Classes: Dropout vs Non-Dropout
+Additional metadata:
 
-##  Dataset
+## Features & Workflow
+Image loading & preprocessing
+CNN model training
+Model evaluation
+Inference script
+Streamlit frontend (optional extension)
 
-- **Source:** [Student Dropout Dataset](URL or description)
-- **Size:** ~670 samples, 33 features
-- **Features include:**
-  - Demographic data (age, gender, etc.)
-  - Academic history
-  - Social and economic background
-
----
-
-## ⚙️ Technologies Used
+##  Technologies Used
 
 - **Python 3.8+**
 - **scikit-learn**
@@ -74,20 +73,22 @@ Each model is evaluated using standard metrics like **accuracy**, **precision**,
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/student-dropout-prediction.git
+   git clone https://tamandakaunda-15/student-dropout-prediction.git
    cd student-dropout-prediction
+   
 (Optional) Create a virtual environment:
-
-
-
+```bash
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 Install dependencies:
 
-pip install -r requirements.txt
-Run the Jupyter notebook:
+pip install -r requirements.txt 
 
+```
+
+Run the Jupyter notebook:
 jupyter notebook notebook/student_dropout_prediction.ipynb
-🤝 Contributors
+
+## Contributors
 Tamanda Kaunda — Data Science & ML Implementation
 
