@@ -27,8 +27,11 @@ The goal is to predict which students are at risk of dropping out based on visua
 
 ## Dataset
 Source: [insert dataset name or link here]
+
 Format: Images (.jpg/.png)
+
 Classes: Dropout vs Non-Dropout
+
 Additional metadata:
 
 ## Features & Workflow
