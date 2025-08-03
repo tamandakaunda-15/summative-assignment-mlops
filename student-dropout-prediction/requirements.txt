@@ -6,3 +6,7 @@ requests
 Pillow
 Flask
 gunicorn
+opencv-python-headless
+Flask
+Flask-Cors
+tensorflow

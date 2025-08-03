@@ -10,7 +10,7 @@ from PIL import Image
 
 # --- API Configuration ---
 # This is the endpoint where your Flask API is running
-API_ENDPOINT = "http://localhost:5001"
+API_ENDPOINT = "http://192.168.1.69:5001"
 
 # --- Functions to interact with the API ---
 @st.cache_data(ttl=5) # Cache the metrics to avoid spamming the API
