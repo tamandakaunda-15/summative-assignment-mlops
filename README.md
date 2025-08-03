@@ -22,7 +22,7 @@ Predict which students are likely to drop out by analyzing classroom images (stu
 
 ## Features & Workflow
 - Image loading and preprocessing  
-- CNN model training with regularization and optimization  
+- Mobile training with regularization and optimization  
 - Model evaluation with multiple metrics  
 - Inference script for predicting new images  
 - Flask API serving prediction and retraining endpoints  
@@ -49,8 +49,8 @@ Predict which students are likely to drop out by analyzing classroom images (stu
 
 
 ## Results
-- **Best Model:** CNN trained with data augmentation and early stopping  
-- **Accuracy:** XX% (insert actual result)  
+- **Best Model:** Transfer Learning model Mobile4
+- **Accuracy:** 0.97  
 - **Key Insights:**  
   - Students with disengaged facial expressions had a higher dropout risk  
   - Data augmentation improved model generalization  
