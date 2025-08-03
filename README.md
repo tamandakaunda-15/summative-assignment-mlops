@@ -107,7 +107,7 @@ Simulation results: [link to screenshot or folder]
 │   ├── model.py
 │   └── prediction.py
 ├── data/
-│   ├── train/
+│   ├── train/  #Data Splitting was done in the student_dropout_prediction.ipynb notebook 
 │   └── test/
 ├── models/
 │   └── student_engagement_model.h5
