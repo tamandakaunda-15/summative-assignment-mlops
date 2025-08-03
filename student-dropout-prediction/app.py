@@ -1,4 +1,3 @@
-# flask_api.py
 import os
 import io
 import cv2
@@ -18,7 +17,6 @@ CORS(app)
 
 # --- Global Variables ---
 MODEL_PATH = 'models/student_engagement_model.h5'
-CASCADE_PATH = 'haarcascade_frontalface_default.xml'
 # This list will store a history of all predictions for the dashboard
 prediction_history = []
 # Record the start time of the application for uptime calculation
@@ -38,14 +36,6 @@ except Exception as e:
     model = None
     print(f"ERROR: Failed to load model from {MODEL_PATH}: {e}")
     print("Prediction and retraining endpoints will not work without a model.")
-
-# Attempt to load the face detector
-print("--- Attempting to load the face cascade ---")
-face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
-if face_cascade.empty():
-    print(f"ERROR: Failed to load face cascade from {CASCADE_PATH}")
-else:
-    print("SUCCESS: Face cascade loaded successfully.")
 
 # --- API Endpoints ---
 
@@ -71,8 +61,7 @@ def get_status():
     
     status_info = {
         'uptime': uptime_string,
-        'model_status': 'Loaded' if model else 'Not Loaded',
-        'face_cascade_status': 'Loaded' if not face_cascade.empty() else 'Not Loaded'
+        'model_status': 'Loaded' if model else 'Not Loaded'
     }
     return jsonify(status_info), 200
 
@@ -80,7 +69,7 @@ def get_status():
 def get_model_metrics():
     """
     Returns mock data for model performance visualizations.
-    This provides data for "graphis for the trained model."
+    This provides data for "graphs for the trained model."
     A real implementation would read this from a training history file.
     """
     model_metrics = {
@@ -100,7 +89,7 @@ def get_model_metrics():
 def metrics():
     """
     Returns dynamic data for the dashboard based on the history of predictions.
-    This endpoint is now wrapped in a try...except block to prevent crashes.
+    This endpoint is wrapped in try...except to prevent crashes.
     """
     try:
         engaged_count = sum(1 for p in prediction_history if p.get('status') == 'Engaged')
@@ -124,9 +113,8 @@ def metrics():
 @app.route('/predict', methods=['POST'])
 def predict():
     """
-    Receives an image, detects faces, and returns a JSON response
-    that includes a base64-encoded image with bounding boxes
-    and prediction details. It also logs the prediction to history.
+    Receives an image, preprocesses it entirely (no face detection),
+    and returns a JSON response with prediction and base64 image.
     """
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
@@ -135,7 +123,7 @@ def predict():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     
-    if face_cascade.empty() or model is None:
+    if model is None:
         return jsonify({'error': 'Server is not properly configured.'}), 500
 
     try:
@@ -146,70 +134,31 @@ def predict():
         if opencv_image is None:
             return jsonify({'error': 'Could not decode image'}), 400
 
-        annotated_image = opencv_image.copy()
+        # Preprocess entire image to grayscale 48x48 for model input
         gray_image = cv2.cvtColor(opencv_image, cv2.COLOR_BGR2GRAY)
+        resized_image = cv2.resize(gray_image, (48, 48))
+        normalized_image = resized_image / 255.0
+        input_array = np.expand_dims(normalized_image, axis=(0, -1))  # shape (1,48,48,1)
 
-        faces = face_cascade.detectMultiScale(
-            gray_image,
-            scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(30, 30),
-            flags=cv2.CASCADE_SCALE_IMAGE
-        )
+        prediction_score = model.predict(input_array)[0][0]
+        engagement_status = "Engaged" if prediction_score > 0.5 else "Not Engaged"
 
-        predictions = []
-        if len(faces) == 0:
-            status = "no_face_detected"
-            message = 'No face found in the image.'
-            prediction_history.append({
-                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                'status': 'No Face'
-            })
-            print("Logged 'No Face' prediction.")
-        else:
-            status = "success"
-            message = 'Face(s) detected and analyzed.'
-            
-            for (x, y, w, h) in faces:
-                face_roi = gray_image[y:y+h, x:x+w]
-                face_roi_resized = cv2.resize(face_roi, (48, 48))
-                face_roi_normalized = face_roi_resized / 255.0
-                face_roi_expanded = np.expand_dims(face_roi_normalized, axis=(0, -1))
+        # Log prediction
+        prediction_history.append({
+            'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'status': engagement_status
+        })
+        print(f"Logged prediction: {engagement_status}")
 
-                prediction_score = model.predict(face_roi_expanded)[0][0]
-                engagement_status = "Engaged" if prediction_score > 0.5 else "Not Engaged"
-
-                color = (0, 255, 0) if engagement_status == "Engaged" else (0, 0, 255)
-                cv2.rectangle(annotated_image, (x, y), (x+w, y+h), color, 2)
-                cv2.putText(
-                    annotated_image,
-                    f"{engagement_status}: {prediction_score:.2f}",
-                    (x, y-10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    color,
-                    2
-                )
-                
-                predictions.append({
-                    'bounding_box': [int(x), int(y), int(w), int(h)],
-                    'prediction_score': float(prediction_score),
-                    'engagement_status': engagement_status
-                })
-
-                prediction_history.append({
-                    'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    'status': engagement_status
-                })
-                print(f"Logged prediction: {engagement_status}")
-
-        _, buffer = cv2.imencode('.jpg', annotated_image)
+        # Encode original image (no bounding boxes)
+        _, buffer = cv2.imencode('.jpg', opencv_image)
         image_base64 = base64.b64encode(buffer).decode('utf-8')
 
         return jsonify({
-            'status': status,
-            'message': message,
-            'predictions': predictions,
+            'status': 'success',
+            'message': 'Image analyzed.',
+            'prediction_score': float(prediction_score),
+            'engagement_status': engagement_status,
             'image_base64': image_base64
         }), 200
 
@@ -246,6 +195,7 @@ def retrain_model():
     }), 200
 
 if __name__ == '__main__':
-    if not os.path.exists(CASCADE_PATH) or model is None:
-        print("API will run, but with reduced functionality due to missing files.")
+    if model is None:
+        print("API will run, but with reduced functionality due to missing model.")
     app.run(host='0.0.0.0', port=5002, debug=True)
+
