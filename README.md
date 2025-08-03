@@ -43,7 +43,7 @@ Predict which students are likely to drop out by analyzing classroom images (stu
 
 
 ## Machine Learning Models
-- Convolutional Neural Network (CNN) — best-performing model  
+- Convolutional Neural Network (Mobile4Dev) — best-performing model  
 - Evaluation metrics used: Accuracy, Precision, Recall, F1-score, Loss  
 
 
@@ -123,7 +123,7 @@ Simulation results: [link to screenshot or folder]
 Tamanda Kaunda — Data Science, Machine Learning, API, and UI development
 
 ## Demo Video
-[YouTube Link Here]
+https://youtu.be/OoCAa_thkDA
 
 ## Deployment URL
 
