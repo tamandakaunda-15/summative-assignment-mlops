@@ -1,97 +1,137 @@
-#  Student Dropout Prediction Using Image Data
+Student Dropout Prediction Using Image Data
+Project Overview
+This project builds a machine learning pipeline to predict student dropout risk based on image data (e.g., facial expressions, classroom engagement). It extends a previous tabular-data summative assignment by incorporating non-tabular, visual data for early dropout detection.
 
-This project builds an ML pipeline to predict student dropout using non-tabular data (images), as a continuation of the student dropout prediction summative assignmetn previously done using tabular data.
+The goal is to provide educational institutions with a tool to identify at-risk students early by analyzing image-based behavioral cues.
 
+Problem Statement
+Predict which students are likely to drop out by analyzing classroom images(students facial expressions that determine whether a student is engaged in class or Not. using deep learning models. Early identification enables targeted intervention to improve student retention.
 
-##  Project Structure
+##Dataset
+Source: https://www.kaggle.com/datasets/joyee19/studentengagement?resource=download
 
-```student-dropout-prediction/
-├── README.md # Project overview and documentation
-├── notebook/
-│ └── student_dropout_prediction.ipynb # EDA, model training and evaluation
-├── src/
-│ ├── preprocessing.py # Data cleaning and preparation
-│ ├── model.py # Model training and evaluation
-│ └── prediction.py # Predicting dropout on new data
-├── data/
-│ ├── train/ # Training dataset(s)
-│ └── test/ # Testing dataset(s)
-└── models/
-└── model_name.pkl # Saved trained model(s)
-```
+Format: Images (.jpg, .png)
 
+Classes:
 
- ## Problem Statement
-The goal is to predict which students are at risk of dropping out based on visual cues (e.g., facial expressions, classroom engagement) extracted from image data. The aim is to build a model that can detect early warning signs using image-based machine learning.
+Dropout
 
+Non-Dropout
 
-## Dataset
-Source: [insert dataset name or link here]
+##Features & Workflow
+Image loading and preprocessing
 
-Format: Images (.jpg/.png)
+CNN model training with regularization and optimization
 
-Classes: Dropout vs Non-Dropout
+Model evaluation with multiple metrics
 
-Additional metadata:
+Inference script for predicting new images
 
-## Features & Workflow
-Image loading & preprocessing
-CNN model training
-Model evaluation
-Inference script
-Streamlit frontend (optional extension)
+Flask API serving prediction and retraining endpoints
 
-##  Technologies Used
+Streamlit dashboard for visualization, model uptime, and retraining interface
 
-- **Python 3.8+**
-- **scikit-learn**
-- **Pandas**
-- **NumPy**
-- **Matplotlib / Seaborn**
-- **Jupyter Notebook**
+##Technologies Used
+Python 3.8+
 
----
+TensorFlow / Keras
 
-##  Machine Learning Models
+scikit-learn
 
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- Neural Networks
+Pandas, NumPy
 
-Each model is evaluated using standard metrics like **accuracy**, **precision**, **recall**, and **F1-score**.
+OpenCV
 
----
+Matplotlib, Seaborn
 
-##  Results
+Flask (API)
 
-- Best model: **[Insert best-performing model here]**
-- Accuracy: **[xx]%**
-- Key insights:
-  - [Add 1–2 insights, e.g., students with poor attendance were 3x more likely to drop out.]
+Streamlit (UI)
 
----
+Locust (Load testing)
 
-## How to Run
+Jupyter Notebook
 
-1. Clone the repository:
-   ```bash
-   git clone https://tamandakaunda-15/student-dropout-prediction.git
-   cd student-dropout-prediction
-   
-(Optional) Create a virtual environment:
-```bash
+Machine Learning Models
+Convolutional Neural Network (CNN) — best-performing model
+
+Evaluation metrics used: Accuracy, Precision, Recall, F1-score, Loss
+
+Results
+Best Model: CNN trained with data augmentation and early stopping
+
+Accuracy: XX% (insert actual result)
+
+Key insights:
+
+Students with disengaged facial expressions had a higher dropout risk
+
+Data augmentation improved model generalization
+
+How to Run
+Clone the repository
+
+git clone https://github.com/tamandakaunda-15/student-dropout-prediction.git
+cd student-dropout-prediction
+(Optional) Create a virtual environment
+
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-Install dependencies:
+source venv/bin/activate   # On Windows use `venv\Scripts\activate`
+Install dependencies
 
-pip install -r requirements.txt 
 
-```
+pip install -r requirements.txt
+Run Jupyter notebook
 
-Run the Jupyter notebook:
+
+
 jupyter notebook notebook/student_dropout_prediction.ipynb
+Run the Flask API
 
-## Contributors
-Tamanda Kaunda — Data Science & ML Implementation
 
+cd api
+gunicorn --bind 0.0.0.0:10000 app:app
+Run the Streamlit dashboard
+
+
+streamlit run dashboard.py --server.port 8501 --server.address 0.0.0.0
+Flood Request Simulation
+Load testing was performed using Locust to simulate flood requests to the prediction API endpoint.
+
+Latency and failure rates were recorded and analyzed to evaluate API robustness under load.
+
+Locust script: simulation/flood_test.py
+
+Simulation results: [link to screenshot or folder]
+
+Project Structure
+bash
+Copy code
+student-dropout-prediction/
+│
+├── README.md
+├── notebook/
+│   └── student_dropout_prediction.ipynb
+├── src/
+│   ├── preprocessing.py
+│   ├── model.py
+│   └── prediction.py
+├── data/
+│   ├── train/
+│   └── test/
+├── models/
+│   └── student_engagement_model.h5
+├── app.py   #this is the api file
+│   
+├── dashboard.  #the user interface that contains visualizations
+│   
+└── simulation/  #flood request simulations
+    └── flood_test.py
+Contributors
+Tamanda Kaunda — Data Science, Machine Learning, API, and UI development
+
+Demo Video
+[YouTube Link Here]
+
+Deployment URL
+[Your Render or cloud deployment URL here]
