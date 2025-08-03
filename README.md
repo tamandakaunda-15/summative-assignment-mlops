@@ -122,14 +122,17 @@ Simulation results: [link to screenshot or folder]
     └── flood_test.py
 ```
 
-###Contributors
+## Contributors
 Tamanda Kaunda — Data Science, Machine Learning, API, and UI development
 
-###Demo Video
+## Demo Video
 [YouTube Link Here]
 
-###Deployment URL
-[Your Render or cloud deployment URL here]
+## Deployment URL
+
+https://summative-assignment-mlops.onrender.com/ #api deployment , wasn't ble to deploy the ui due to internal errors and bugs
+
+
 
 
 
