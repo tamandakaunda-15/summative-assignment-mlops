@@ -5,12 +5,12 @@ import cv2
 import numpy as np
 import base64
 import time
-import pandas as pd # Re-added for potential future use, though not strictly needed here
+import pandas as pd
 from flask import Flask, request, jsonify, Response
 from tensorflow.keras.models import load_model
 from PIL import Image
 from flask_cors import CORS
-import zipfile # Re-added for potential future use
+import zipfile
 
 # --- Initialize Flask App and CORS ---
 app = Flask(__name__)
@@ -18,9 +18,11 @@ CORS(app)
 
 # --- Global Variables ---
 MODEL_PATH = 'models/student_engagement_model.h5'
-CASCADE_PATH = 'models/haarcascade_frontalface_default.xml'
+CASCADE_PATH = 'haarcascade_frontalface_default.xml'
 # This list will store a history of all predictions for the dashboard
-prediction_history = [] 
+prediction_history = []
+# Record the start time of the application for uptime calculation
+START_TIME = time.time()
 
 # Attempt to load the model
 print("--- Attempting to load the model ---")
@@ -46,32 +48,78 @@ else:
     print("SUCCESS: Face cascade loaded successfully.")
 
 # --- API Endpoints ---
+
 @app.route('/')
 def home():
     """Root endpoint to confirm the API is running."""
     return jsonify({
         'status': 'success',
-        'message': 'Student Engagement API is running! The /predict and /metrics endpoints are ready.'
+        'message': 'Student Engagement API is running! Available endpoints: /predict, /metrics, /status, /model_metrics, /train, /retrain.'
     }), 200
+
+@app.route('/status', methods=['GET'])
+def get_status():
+    """
+    Returns the model's uptime and health status.
+    This provides the data needed for a "Model up-time" display.
+    """
+    uptime = time.time() - START_TIME
+    hours = int(uptime // 3600)
+    minutes = int((uptime % 3600) // 60)
+    seconds = int(uptime % 60)
+    uptime_string = f"{hours}h {minutes}m {seconds}s"
+    
+    status_info = {
+        'uptime': uptime_string,
+        'model_status': 'Loaded' if model else 'Not Loaded',
+        'face_cascade_status': 'Loaded' if not face_cascade.empty() else 'Not Loaded'
+    }
+    return jsonify(status_info), 200
+
+@app.route('/model_metrics', methods=['GET'])
+def get_model_metrics():
+    """
+    Returns mock data for model performance visualizations.
+    This provides data for "graphis for the trained model."
+    A real implementation would read this from a training history file.
+    """
+    model_metrics = {
+        'accuracy': 0.925,
+        'loss': 0.156,
+        'training_history': {
+            'epochs': list(range(1, 11)),
+            'accuracy': [0.70, 0.75, 0.81, 0.85, 0.88, 0.90, 0.91, 0.92, 0.92, 0.93],
+            'val_accuracy': [0.65, 0.70, 0.78, 0.82, 0.86, 0.88, 0.89, 0.91, 0.92, 0.925],
+            'loss': [0.50, 0.45, 0.38, 0.30, 0.25, 0.20, 0.18, 0.17, 0.16, 0.156],
+            'val_loss': [0.60, 0.55, 0.45, 0.35, 0.28, 0.22, 0.19, 0.17, 0.16, 0.158]
+        }
+    }
+    return jsonify(model_metrics), 200
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
     """
     Returns dynamic data for the dashboard based on the history of predictions.
+    This endpoint is now wrapped in a try...except block to prevent crashes.
     """
-    engaged_count = sum(1 for p in prediction_history if p.get('status') == 'Engaged')
-    not_engaged_count = len(prediction_history) - engaged_count
-    
-    # Get the last 10 predictions for the recent activity feed
-    recent_predictions = prediction_history[-10:]
-    
-    metrics_data = {
-        'total_predictions': len(prediction_history),
-        'engaged_count': engaged_count,
-        'not_engaged_count': not_engaged_count,
-        'recent_predictions': recent_predictions
-    }
-    return jsonify(metrics_data), 200
+    try:
+        engaged_count = sum(1 for p in prediction_history if p.get('status') == 'Engaged')
+        not_engaged_count = len(prediction_history) - engaged_count
+        
+        recent_predictions = prediction_history[-10:]
+        
+        metrics_data = {
+            'total_predictions': len(prediction_history),
+            'engaged_count': engaged_count,
+            'not_engaged_count': not_engaged_count,
+            'recent_predictions': recent_predictions
+        }
+        
+        print(f"Metrics endpoint sending data: {metrics_data}")
+        return jsonify(metrics_data), 200
+    except Exception as e:
+        print(f"ERROR: An error occurred in the metrics endpoint: {e}")
+        return jsonify({'error': 'An internal server error occurred.'}), 500
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -91,7 +139,6 @@ def predict():
         return jsonify({'error': 'Server is not properly configured.'}), 500
 
     try:
-        # Read image bytes and convert to an OpenCV image format
         image_bytes = file.read()
         nparr = np.frombuffer(image_bytes, np.uint8)
         opencv_image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -114,11 +161,11 @@ def predict():
         if len(faces) == 0:
             status = "no_face_detected"
             message = 'No face found in the image.'
-            # Log the no-face event to history for the dashboard
             prediction_history.append({
                 'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 'status': 'No Face'
             })
+            print("Logged 'No Face' prediction.")
         else:
             status = "success"
             message = 'Face(s) detected and analyzed.'
@@ -150,12 +197,11 @@ def predict():
                     'engagement_status': engagement_status
                 })
 
-                # Log the prediction to the global history
                 prediction_history.append({
                     'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     'status': engagement_status
                 })
-
+                print(f"Logged prediction: {engagement_status}")
 
         _, buffer = cv2.imencode('.jpg', annotated_image)
         image_base64 = base64.b64encode(buffer).decode('utf-8')
@@ -168,45 +214,35 @@ def predict():
         }), 200
 
     except Exception as e:
+        print(f"ERROR: An error occurred in the predict endpoint: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/stream_video')
-def stream_video():
+@app.route('/train', methods=['POST'])
+def train_model():
     """
-    Generates a live video feed from the webcam with face detection.
+    Placeholder endpoint to handle model training.
     """
-    def generate_frames():
-        cap = cv2.VideoCapture(0)
-        while True:
-            success, frame = cap.read()
-            if not success:
-                break
-            else:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-
-                for (x, y, w, h) in faces:
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-
-                ret, buffer = cv2.imencode('.jpg', frame)
-                if not ret:
-                    continue
-                frame_bytes = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-        cap.release()
-
-    return Response(generate_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    if model is None:
+        return jsonify({'error': 'Model not loaded, cannot train.'}), 500
+    
+    # Placeholder training logic would go here
+    return jsonify({
+        'status': 'success',
+        'message': 'Training initiated. This is a placeholder.'
+    }), 200
 
 @app.route('/retrain', methods=['POST'])
 def retrain_model():
     """
-    Placeholder endpoint to retrain the model.
+    Placeholder endpoint to handle model retraining.
     """
+    if model is None:
+        return jsonify({'error': 'Model not loaded, cannot retrain.'}), 500
+
+    # Placeholder retraining logic would go here
     return jsonify({
         'status': 'success',
-        'message': 'Retraining endpoint is a placeholder. Logic would be implemented here.'
+        'message': 'Retraining initiated. This is a placeholder.'
     }), 200
 
 if __name__ == '__main__':
