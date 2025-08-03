@@ -130,7 +130,7 @@ Tamanda Kaunda — Data Science, Machine Learning, API, and UI development
 
 ## Deployment URL
 
-https://summative-assignment-mlops.onrender.com/ #api deployment , wasn't ble to deploy the ui due to internal errors and bugs
+https://summative-assignment-mlops.onrender.com/ #api deployment , The UI had alot of bugs and internal errors to internal errors but here's the url ; https://tamandakaunda-15-sum-student-dropout-predictiondashboard-gg8a44.streamlit.app/
 
 
 
