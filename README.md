@@ -5,12 +5,11 @@ This project builds a machine learning pipeline to predict student dropout risk 
 
 The goal is to provide educational institutions with a tool to identify at-risk students early by analyzing image-based behavioral cues.
 
----
 
 ## Problem Statement
 Predict which students are likely to drop out by analyzing classroom images (students’ facial expressions that determine whether a student is engaged in class or not) using deep learning models. Early identification enables targeted intervention to improve student retention.
 
----
+
 
 ## Dataset
 - **Source:** [Kaggle - Student Engagement Dataset](https://www.kaggle.com/datasets/joyee19/studentengagement?resource=download)  
@@ -19,7 +18,7 @@ Predict which students are likely to drop out by analyzing classroom images (stu
   - Dropout  
   - Non-Dropout  
 
----
+
 
 ## Features & Workflow
 - Image loading and preprocessing  
@@ -29,7 +28,6 @@ Predict which students are likely to drop out by analyzing classroom images (stu
 - Flask API serving prediction and retraining endpoints  
 - Streamlit dashboard for visualization, model uptime, and retraining interface  
 
----
 
 ## Technologies Used
 - Python 3.8+  
@@ -43,13 +41,12 @@ Predict which students are likely to drop out by analyzing classroom images (stu
 - Locust (Load testing)  
 - Jupyter Notebook  
 
----
 
 ## Machine Learning Models
 - Convolutional Neural Network (CNN) — best-performing model  
 - Evaluation metrics used: Accuracy, Precision, Recall, F1-score, Loss  
 
----
+
 
 ## Results
 - **Best Model:** CNN trained with data augmentation and early stopping  
@@ -58,7 +55,7 @@ Predict which students are likely to drop out by analyzing classroom images (stu
   - Students with disengaged facial expressions had a higher dropout risk  
   - Data augmentation improved model generalization  
 
----
+
 
 ## How to Run
 
