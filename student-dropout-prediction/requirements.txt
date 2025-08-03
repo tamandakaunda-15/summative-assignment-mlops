@@ -10,3 +10,4 @@ opencv-python-headless
 Flask
 Flask-Cors
 tensorflow
+opencv-python
