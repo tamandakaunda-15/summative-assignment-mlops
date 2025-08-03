@@ -7,10 +7,12 @@ import requests
 import io
 import json
 from PIL import Image
+from datetime import timedelta
 
 # --- API Configuration ---
-# This is the endpoint where your Flask API is running
-API_ENDPOINT = "http://127.0.0.1:5001"
+# Corrected: Using the deployed API endpoint.
+# The previous `http://localhost:5001` only works if the API is running locally.
+API_ENDPOINT = "https://summative-assignment-mlops.onrender.com"
 
 # --- Functions to interact with the API ---
 @st.cache_data(ttl=5) # Cache the metrics to avoid spamming the API
@@ -25,7 +27,7 @@ def get_metrics_from_api():
         return response.json()
     except (requests.exceptions.RequestException, ValueError) as e:
         # Handle connection errors or JSON decoding errors
-        st.error(f"Failed to get metrics from API: {e}")
+        st.error(f"Failed to get metrics from API. Please ensure the deployed API is running: {e}")
         return None
 
 def make_prediction_request(image_data):
@@ -77,15 +79,14 @@ if page == "Dashboard Overview":
     # Fetch all metrics once and use the data throughout this section
     metrics_data = get_metrics_from_api()
     if not metrics_data:
-        st.warning("Could not fetch metrics from the API. Please ensure `app.py` is running.")
+        st.warning("Could not fetch metrics from the API. Please ensure the backend is running and reachable.")
         st.stop()
 
     # Display Model Up-time
     st.subheader("Model Up-time")
     uptime_seconds = metrics_data.get("uptime_seconds", 0)
-    hours, remainder = divmod(uptime_seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    st.metric(label="API Uptime", value=f"{int(hours)}h {int(minutes)}m {int(seconds)}s")
+    uptime_delta = timedelta(seconds=int(uptime_seconds))
+    st.metric(label="API Uptime", value=str(uptime_delta))
 
     # Visualization section for model performance
     st.subheader("Model Training History")
@@ -113,7 +114,7 @@ if page == "Dashboard Overview":
     # Visualization for Dataset Distribution
     st.subheader("Dataset Class Distribution")
     class_distribution = metrics_data.get("dataset_distribution", {})
-    distribution_df = pd.DataFrame(class_distribution)
+    distribution_df = pd.DataFrame(list(class_distribution.items()), columns=['Class', 'Count'])
     if not distribution_df.empty:
         fig_dist = px.bar(
             distribution_df,
@@ -190,3 +191,4 @@ elif page == "Model Retraining":
                     st.error(f"Retraining failed. Message: {retrain_response.get('error', 'Unknown error')}")
         else:
             st.warning("Please upload a `.zip` dataset before starting the retraining process.")
+
